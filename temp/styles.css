@@ -1,0 +1,123 @@
+/* General Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    background-color: #f4f4f4;
+    color: #333;
+}
+.container {
+    width: 90%;
+    margin: 0 auto;
+}
+
+/* Header Section */
+.header {
+    background: #333;
+    color: white;
+    text-align: center;
+    padding: 50px 0;
+}
+.header h1 {
+    font-size: 2.5rem;
+}
+.slogan {
+    margin: 10px 0;
+    font-size: 1.2rem;
+}
+.btn {
+    background: #ff6600;
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background 0.3s;
+}
+.btn:hover {
+    background: #ff8533;
+}
+
+/* About Section */
+.about-section {
+    padding: 50px 0;
+    background: #eaeaea;
+    text-align: center;
+}
+.about-section h2 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+}
+
+/* Services Section */
+.services-section {
+    padding: 50px 0;
+    background: #fff;
+    text-align: center;
+}
+.service-item {
+    margin: 20px 0;
+}
+.service-item h3 {
+    font-size: 1.5rem;
+    color: #333;
+}
+
+/* Testimonials Section */
+.testimonials-section {
+    padding: 50px 0;
+    background: #f4f4f4;
+    text-align: center;
+}
+.testimonials-section blockquote {
+    font-style: italic;
+    font-size: 1.2rem;
+    color: #555;
+    margin: 20px 0;
+}
+
+/* Team Section */
+.team-section {
+    padding: 50px 0;
+    background: #fff;
+    text-align: center;
+}
+.team-member {
+    margin: 20px 0;
+}
+.team-member h3 {
+    font-size: 1.5rem;
+    color: #333;
+}
+
+/* Footer Section */
+footer {
+    background: #333;
+    color: white;
+    padding: 20px 0;
+    text-align: center;
+}
+.contact-info, .social-media {
+    margin: 10px 0;
+}
+footer a {
+    color: #ff6600;
+    margin: 0 10px;
+    text-decoration: none;
+}
+footer a:hover {
+    color: #ff8533;
+}
+
+/* Mobile Styles */
+@media (max-width: 768px) {
+    .header h1 {
+        font-size: 2rem;
+    }
+    .about-section, .services-section, .testimonials-section, .team-section {
+        padding: 30px 0;
+    }
+}

@@ -1,0 +1,142 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Resources:
+  
+  ### Cognito User Pool ###
+  CognitoUserPool:
+    Type: "AWS::Cognito::UserPool"
+    Properties:
+      UserPoolName: "VideoAppUserPool"
+  
+  CognitoUserPoolClient:
+    Type: "AWS::Cognito::UserPoolClient"
+    Properties: 
+      ClientName: "VideoAppUserClient"
+      UserPoolId: !Ref CognitoUserPool
+      GenerateSecret: false
+
+  ### S3 Buckets ###
+  VideoUploadBucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: "video-upload-bucket"
+      CorsConfiguration:
+        CorsRules:
+          - AllowedMethods: ["GET", "PUT"]
+            AllowedOrigins: ["*"]
+            AllowedHeaders: ["*"]
+
+  TranscriptionOutputBucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: "transcription-output-bucket"
+  
+  ### Lambda Functions ###
+
+  ### Lambda to Generate Pre-Signed URL ###
+  GeneratePresignedUrlFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: generate_presigned_url.lambda_handler
+      Runtime: python3.9
+      Timeout: 30
+      Environment:
+        Variables:
+          UPLOAD_BUCKET: !Ref VideoUploadBucket
+      Policies:
+        - S3CrudPolicy:
+            BucketName: !Ref VideoUploadBucket
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /generate-presigned-url
+            Method: GET
+  
+  ### Lambda to Start Transcription Job ###
+  StartTranscriptionFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: start_transcription.lambda_handler
+      Runtime: python3.9
+      Timeout: 60
+      Environment:
+        Variables:
+          UPLOAD_BUCKET: !Ref VideoUploadBucket
+          TRANSCRIBE_ROLE_ARN: !GetAtt TranscribeServiceRole.Arn
+      Policies:
+        - S3ReadPolicy:
+            BucketName: !Ref VideoUploadBucket
+        - PolicyName: TranscribePolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - transcribe:StartTranscriptionJob
+                  - transcribe:GetTranscriptionJob
+                Resource: "*"
+  
+  ### Lambda to Save Transcription Result to S3 ###
+  SaveTranscriptionResultFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: save_transcription_result.lambda_handler
+      Runtime: python3.9
+      Timeout: 60
+      Environment:
+        Variables:
+          OUTPUT_BUCKET: !Ref TranscriptionOutputBucket
+      Policies:
+        - S3CrudPolicy:
+            BucketName: !Ref TranscriptionOutputBucket
+  
+  ### Step Functions ###
+  TranscriptionStateMachine:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      Definition:
+        StartAt: StartTranscription
+        States:
+          StartTranscription:
+            Type: Task
+            Resource: !GetAtt StartTranscriptionFunction.Arn
+            Next: SaveResult
+          SaveResult:
+            Type: Task
+            Resource: !GetAtt SaveTranscriptionResultFunction.Arn
+            End: true
+      Policies:
+        - S3ReadPolicy:
+            BucketName: !Ref VideoUploadBucket
+        - S3CrudPolicy:
+            BucketName: !Ref TranscriptionOutputBucket
+  
+  ### IAM Role for Transcribe Service ###
+  TranscribeServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: transcribe.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: TranscribeS3Policy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                Resource:
+                  - !Sub arn:aws:s3:::${VideoUploadBucket}/*
+                  - !Sub arn:aws:s3:::${TranscriptionOutputBucket}/*
+
+Outputs:
+  ApiUrl:
+    Description: "API Gateway endpoint URL for accessing the Lambda"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"

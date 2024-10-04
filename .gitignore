@@ -160,3 +160,58 @@ cython_debug/
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
+
+# Dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# Testing
+/coverage
+
+# Production
+/build
+
+# Misc
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# AWS Amplify
+/transcript-summarizer/amplify/.config
+/transcript-summarizer/amplify/backend/function/*/src/node_modules
+/transcript-summarizer/amplify/backend/function/*/dist
+/transcript-summarizer/amplify/backend/amplify-meta.json
+/transcript-summarizer/amplify/backend/awscloudformation
+/transcript-summarizer/amplify/backend/auth
+/transcript-summarizer/amplify/#current-cloud-backend
+/transcript-summarizer/amplify/backend/api/*/build
+/transcript-summarizer/amplify/backend/api/*/node_modules
+/transcript-summarizer/amplify/backend/api/*/dist
+/transcript-summarizer/amplify/backend/hosting
+/transcript-summarizer/amplify/backend/storage
+/transcript-summarizer/amplify/backend/analytics
+/transcript-summarizer/amplify/team-provider-info.json
+aws-exports.js
+awsconfiguration.json
+amplifyconfiguration.json
+amplify-build-config.json
+amplify-gradle-config.json
+
+# VSCode
+.vscode
+
+# WebStorm
+.idea
+
+# Environment Variables
+.env
+
+# Local Netlify folder
+.netlify
